@@ -47,6 +47,27 @@ neego-skills/
 
 ## 本地安装到 Codex
 
+### 从 GitHub 安装到 Codex
+
+先克隆仓库，再把 skill 复制到 Codex 的 skills 目录：
+
+```bash
+git clone https://github.com/Dying5566/neego-skills.git /tmp/neego-skills
+cp -R /tmp/neego-skills/skills/youtube-video-packager ~/.codex/skills/
+```
+
+或者直接使用 Codex 自带的 GitHub 安装脚本：
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo Dying5566/neego-skills \
+  --path skills/youtube-video-packager
+```
+
+安装完成后，重启 Codex，让新 skill 被正确加载。
+
+### 本地开发方式安装到 Codex
+
 直接复制：
 
 ```bash
@@ -65,6 +86,18 @@ ln -s "$(pwd)/skills/youtube-video-packager" ~/.codex/skills/youtube-video-packa
 
 - `claude-code/commands/youtube-video-packager.md`
 
+### 从 GitHub 安装到 Claude Code
+
+先克隆仓库，再把命令文件复制到 Claude Code 的 commands 目录：
+
+```bash
+git clone https://github.com/Dying5566/neego-skills.git /tmp/neego-skills
+mkdir -p ~/.claude/commands
+cp /tmp/neego-skills/claude-code/commands/youtube-video-packager.md ~/.claude/commands/
+```
+
+### 本地开发方式安装到 Claude Code
+
 要在 Claude Code 里使用，可以把它复制或软链接到：
 
 ```bash
@@ -75,6 +108,13 @@ ln -s "$(pwd)/skills/youtube-video-packager" ~/.codex/skills/youtube-video-packa
 
 ```text
 /youtube-video-packager
+```
+
+如果你想在开发时保持仓库修改自动生效，也可以用软链接：
+
+```bash
+mkdir -p ~/.claude/commands
+ln -s "$(pwd)/claude-code/commands/youtube-video-packager.md" ~/.claude/commands/youtube-video-packager.md
 ```
 
 ## 工作流示例

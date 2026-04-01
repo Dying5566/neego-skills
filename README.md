@@ -40,6 +40,27 @@ Capabilities:
 
 ## Install a skill locally
 
+### Install into Codex from GitHub
+
+Clone the repository and copy the skill into your Codex skills directory:
+
+```bash
+git clone https://github.com/Dying5566/neego-skills.git /tmp/neego-skills
+cp -R /tmp/neego-skills/skills/youtube-video-packager ~/.codex/skills/
+```
+
+Or install it with the Codex GitHub installer:
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo Dying5566/neego-skills \
+  --path skills/youtube-video-packager
+```
+
+Restart Codex after installation so the new skill is loaded.
+
+### Install into Codex for local development
+
 Copy the skill folder into your Codex skills directory:
 
 ```bash
@@ -58,6 +79,18 @@ This repository also includes a Claude Code slash command version:
 
 - `claude-code/commands/youtube-video-packager.md`
 
+### Install into Claude Code from GitHub
+
+Clone the repository and copy the command file into your Claude Code commands directory:
+
+```bash
+git clone https://github.com/Dying5566/neego-skills.git /tmp/neego-skills
+mkdir -p ~/.claude/commands
+cp /tmp/neego-skills/claude-code/commands/youtube-video-packager.md ~/.claude/commands/
+```
+
+### Install into Claude Code for local development
+
 To use it in Claude Code, copy or symlink that file into:
 
 ```bash
@@ -68,6 +101,13 @@ Then invoke it with:
 
 ```text
 /youtube-video-packager
+```
+
+If you prefer a symlink during development:
+
+```bash
+mkdir -p ~/.claude/commands
+ln -s "$(pwd)/claude-code/commands/youtube-video-packager.md" ~/.claude/commands/youtube-video-packager.md
 ```
 
 ## Example workflow
