@@ -1,0 +1,4 @@
+interface:
+  display_name: "YouTube Video Packager"
+  short_description: "Package YouTube videos into subtitled deliverables"
+  default_prompt: "Use $youtube-video-packager to download a YouTube video, prepare subtitles, and export platform-ready outputs."

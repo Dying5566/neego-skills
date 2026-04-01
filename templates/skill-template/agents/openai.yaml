@@ -1,0 +1,4 @@
+interface:
+  display_name: "Your Skill Name"
+  short_description: "Describe the skill in one short public-facing line"
+  default_prompt: "Use $your-skill-name to complete the requested workflow and return the generated artifacts."
