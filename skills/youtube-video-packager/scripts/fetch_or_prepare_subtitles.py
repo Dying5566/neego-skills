@@ -31,7 +31,25 @@ def list_subs(url: str) -> str:
     return (result.stdout or "") + "\n" + (result.stderr or "")
 
 
-def download_subs(url: str, languages: list[str], output_dir: Path) -> list[str]:
+def pick_languages(subtitle_mode: str, script_preference: str | None) -> list[str]:
+    if subtitle_mode != "zh":
+        return LANGUAGE_MAP[subtitle_mode]
+    if script_preference == "zh-Hant":
+        return ["zh-Hant", "zh-Hans"]
+    return ["zh-Hans", "zh-Hant"]
+
+
+def detect_selected_script(files: list[str]) -> str | None:
+    for path in files:
+        name = Path(path).name
+        if ".zh-Hans." in name or name.endswith(".zh-Hans.srt"):
+            return "zh-Hans"
+        if ".zh-Hant." in name or name.endswith(".zh-Hant.srt"):
+            return "zh-Hant"
+    return None
+
+
+def download_subs(url: str, languages: list[str], output_dir: Path, video_slug: str | None) -> list[str]:
     cmd = [
         "yt-dlp",
         "--cookies-from-browser",
@@ -47,7 +65,7 @@ def download_subs(url: str, languages: list[str], output_dir: Path) -> list[str]
         "--convert-subs",
         "srt",
         "-o",
-        str(output_dir / "%(title)s.%(ext)s"),
+        str(output_dir / (f"{video_slug}.%(ext)s" if video_slug else "%(title)s.%(ext)s")),
         url,
     ]
     run(cmd)
@@ -69,7 +87,9 @@ def main() -> None:
     parser.add_argument("--video", required=True)
     parser.add_argument("--subtitle-mode", required=True, choices=["none", "zh", "en", "bilingual"])
     parser.add_argument("--subtitle-source", required=True, choices=["youtube", "ask_if_missing", "whisper"])
+    parser.add_argument("--script-preference", choices=["zh-Hans", "zh-Hant"])
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--video-slug")
     args = parser.parse_args()
 
     if args.subtitle_mode == "none":
@@ -80,15 +100,16 @@ def main() -> None:
     output_dir = Path(args.output_dir).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     subtitle_listing = list_subs(args.url)
-    languages = LANGUAGE_MAP[args.subtitle_mode]
+    languages = pick_languages(args.subtitle_mode, args.script_preference)
     found_on_youtube = any(lang in subtitle_listing for lang in languages)
 
     if found_on_youtube:
-        files = download_subs(args.url, languages, output_dir)
+        files = download_subs(args.url, languages, output_dir, args.video_slug)
         print(json.dumps({
             "status": "ok",
             "subtitle_source": "youtube",
             "files": files,
+            "selected_script": detect_selected_script(files),
             "listed_subtitles": subtitle_listing.strip(),
         }, ensure_ascii=False, indent=2))
         return
@@ -116,6 +137,7 @@ def main() -> None:
         "status": "ok",
         "subtitle_source": "whisper",
         "files": files,
+        "selected_script": args.script_preference if args.subtitle_mode == "zh" else None,
         "listed_subtitles": subtitle_listing.strip(),
     }, ensure_ascii=False, indent=2))
 

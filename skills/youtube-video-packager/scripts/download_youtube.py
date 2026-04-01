@@ -52,6 +52,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Download a YouTube video while preserving the original source")
     parser.add_argument("--url", required=True)
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--video-slug")
     parser.add_argument("--quality", default="best", choices=sorted(QUALITY_MAP))
     parser.add_argument("--format", dest="format_type", default="mp4", choices=["mp4", "webm", "mkv"])
     parser.add_argument("--audio-only", action="store_true")
@@ -60,7 +61,8 @@ def main() -> None:
     ensure_binary("yt-dlp")
     output_dir = Path(args.output_dir).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    template = str(output_dir / "%(title)s.%(ext)s")
+    template_name = f"{args.video_slug}.%(ext)s" if args.video_slug else "%(title)s.%(ext)s"
+    template = str(output_dir / template_name)
 
     if args.audio_only:
         cmd = YT_DLP_BASE + ["-x", "--audio-format", "mp3", "--audio-quality", "0", "-o", template, args.url]

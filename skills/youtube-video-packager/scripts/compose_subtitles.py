@@ -115,19 +115,19 @@ def build_ass_header(preset: str, bilingual: bool) -> str:
             ]
         else:
             styles = [
-                "Style: Default,Arial Unicode MS,42,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,3,0,8,70,70,930,1",
+                "Style: Default,Arial Unicode MS,50,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,3,0,8,70,70,930,1",
             ]
     elif preset == "vertical-9x16":
         width, height = 1080, 1920
         styles = [
-            "Style: Default,Arial Unicode MS,42,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,3,0,2,80,80,150,1",
+            "Style: Default,Arial Unicode MS,50,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,3,0,2,80,80,150,1",
             "Style: ZH,Arial Unicode MS,46,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,3,0,2,80,80,210,1",
             "Style: EN,Arial Unicode MS,30,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,3,0,2,80,80,150,1",
         ]
     else:
         width, height = 640, 360
         styles = [
-            "Style: Default,Arial Unicode MS,16,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,2,0,2,20,20,40,1",
+            "Style: Default,Arial Unicode MS,50,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,2,0,2,20,20,40,1",
             "Style: ZH,Arial Unicode MS,20,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,2,0,2,20,20,52,1",
             "Style: EN,Arial Unicode MS,15,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,2,0,2,20,20,40,1",
         ]
@@ -172,6 +172,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Compose standalone and styled subtitle assets")
     parser.add_argument("--subtitle-mode", required=True, choices=["zh", "en", "bilingual"])
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--video-slug")
+    parser.add_argument("--lang-tag")
     parser.add_argument("--preset", default="original", choices=["original", "xiaohongshu-3x4", "vertical-9x16"])
     parser.add_argument("--emit-ass", action="store_true")
     parser.add_argument("--zh-srt")
@@ -186,24 +188,26 @@ def main() -> None:
         if not args.zh_srt:
             raise SystemExit("--zh-srt is required for zh mode")
         source = Path(args.zh_srt).expanduser().resolve()
-        srt_target = output_dir / f"{source.stem}.clean.srt"
+        base_name = f"{args.video_slug}.{args.lang_tag}" if args.video_slug and args.lang_tag else source.stem
+        srt_target = output_dir / f"{base_name}.clean.srt"
         copy_if_needed(source, srt_target)
         created.append(str(srt_target))
         if args.emit_ass:
             cues = parse_srt(source)
-            ass_target = output_dir / f"{source.stem}.{args.preset}.ass"
+            ass_target = output_dir / f"{base_name}.{args.preset}.ass"
             write_ass(cues, ass_target, args.preset, bilingual=False)
             created.append(str(ass_target))
     elif args.subtitle_mode == "en":
         if not args.en_srt:
             raise SystemExit("--en-srt is required for en mode")
         source = Path(args.en_srt).expanduser().resolve()
-        srt_target = output_dir / f"{source.stem}.clean.srt"
+        base_name = f"{args.video_slug}.{args.lang_tag}" if args.video_slug and args.lang_tag else source.stem
+        srt_target = output_dir / f"{base_name}.clean.srt"
         copy_if_needed(source, srt_target)
         created.append(str(srt_target))
         if args.emit_ass:
             cues = parse_srt(source)
-            ass_target = output_dir / f"{source.stem}.{args.preset}.ass"
+            ass_target = output_dir / f"{base_name}.{args.preset}.ass"
             write_ass(cues, ass_target, args.preset, bilingual=False)
             created.append(str(ass_target))
     else:
@@ -212,11 +216,12 @@ def main() -> None:
         en_cues = parse_srt(Path(args.en_srt).expanduser().resolve())
         zh_cues = parse_srt(Path(args.zh_srt).expanduser().resolve())
         cues = build_bilingual_cues(en_cues, zh_cues)
-        srt_target = output_dir / "bilingual-clean.srt"
+        base_name = f"{args.video_slug}.bilingual" if args.video_slug else "bilingual-clean"
+        srt_target = output_dir / f"{base_name}.srt"
         write_srt(cues, srt_target)
         created.append(str(srt_target))
         if args.emit_ass:
-            ass_target = output_dir / f"bilingual-clean.{args.preset}.ass"
+            ass_target = output_dir / f"{base_name}.{args.preset}.ass"
             write_ass(cues, ass_target, args.preset, bilingual=True)
             created.append(str(ass_target))
 

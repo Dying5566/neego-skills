@@ -22,13 +22,15 @@ neego-skills/
 
 ### `youtube-video-packager`
 
-Download a YouTube video, prepare subtitles, and export platform-ready deliverables while always keeping the original video.
+Download a YouTube video, prepare subtitles, generate a short video summary, and export platform-ready deliverables while always keeping the original video.
 
 Capabilities:
 - Download the original YouTube video with `yt-dlp`
 - Fetch official or auto subtitles when available
 - Stop and ask before using Whisper when subtitles are missing
+- Infer simplified or traditional Chinese subtitle preference from the user's wording
 - Build `srt` or `ass` subtitle assets for `zh`, `en`, and `bilingual`
+- Generate a concise summary from subtitle content
 - Export subtitled outputs for `original`, `xiaohongshu-3x4`, and `vertical-9x16`
 
 ## Install a skill locally
@@ -51,36 +53,139 @@ ln -s "$(pwd)/skills/youtube-video-packager" ~/.codex/skills/youtube-video-packa
 2. Check whether YouTube already provides subtitles.
 3. Download subtitles or stop and ask whether Whisper should be used.
 4. Compose clean subtitle assets.
-5. Export either the original layout or a platform preset with burned subtitles.
+5. Generate a concise summary from subtitles.
+6. Export either the original layout or a platform preset with burned subtitles.
+
+Example output layout:
+
+```text
+outputs/
+└── example-video/
+    ├── source/
+    │   └── example-video.mp4
+    ├── subtitles/
+    │   ├── example-video.zh-Hans.srt
+    │   └── example-video.zh-Hans.xiaohongshu-3x4.ass
+    ├── renders/
+    │   └── example-video.xiaohongshu-3x4.zh-Hans.burned.mp4
+    └── summary/
+        └── example-video.summary.md
+```
 
 Example commands:
 
 ```bash
 python3 skills/youtube-video-packager/scripts/download_youtube.py \
   --url "https://www.youtube.com/watch?v=VIDEO_ID" \
-  --output-dir ./outputs
+  --output-dir ./outputs/example-video/source \
+  --video-slug example-video
 
 python3 skills/youtube-video-packager/scripts/fetch_or_prepare_subtitles.py \
   --url "https://www.youtube.com/watch?v=VIDEO_ID" \
-  --video ./outputs/example.mp4 \
+  --video ./outputs/example-video/source/example-video.mp4 \
   --subtitle-mode zh \
   --subtitle-source ask_if_missing \
-  --output-dir ./outputs
+  --script-preference zh-Hans \
+  --output-dir ./outputs/example-video/subtitles \
+  --video-slug example-video
 
 python3 skills/youtube-video-packager/scripts/compose_subtitles.py \
   --subtitle-mode zh \
-  --zh-srt ./outputs/example.zh-Hans.srt \
-  --output-dir ./outputs \
-  --preset xiaohongshu-3x4
+  --zh-srt ./outputs/example-video/subtitles/example-video.zh-Hans.srt \
+  --output-dir ./outputs/example-video/subtitles \
+  --video-slug example-video \
+  --lang-tag zh-Hans \
+  --preset xiaohongshu-3x4 \
+  --emit-ass
+
+python3 skills/youtube-video-packager/scripts/summarize_from_subtitles.py \
+  --subtitle ./outputs/example-video/subtitles/example-video.zh-Hans.clean.srt \
+  --output-dir ./outputs/example-video/summary \
+  --video-slug example-video
 
 python3 skills/youtube-video-packager/scripts/render_platform_video.py \
-  --video ./outputs/example.mp4 \
-  --subtitle-ass ./outputs/example.zh-only.xiaohongshu-3x4.ass \
+  --video ./outputs/example-video/source/example-video.mp4 \
+  --subtitle-ass ./outputs/example-video/subtitles/example-video.zh-Hans.xiaohongshu-3x4.ass \
   --render-mode burn \
   --preset xiaohongshu-3x4 \
   --background black \
-  --output-dir ./outputs
+  --lang-tag zh-Hans \
+  --output-dir ./outputs/example-video/renders \
+  --video-slug example-video
 ```
+
+Default behavior note:
+- If the user says “配上中文字幕”, the skill should treat that as a request for a final burned-subtitle video by default.
+- If the user only wants subtitle files, they should say so explicitly.
+
+## Example requests
+
+These are example prompts this skill is designed to handle well:
+
+### 1. Download only
+
+```text
+YouTube Video Packager, download this video:
+https://www.youtube.com/watch?v=VIDEO_ID
+Keep the original video only.
+```
+
+Expected outputs:
+- `source/<video_slug>.mp4`
+
+### 2. Download and add simplified Chinese subtitles
+
+```text
+YouTube Video Packager, help me download this video and add simplified Chinese subtitles:
+https://www.youtube.com/watch?v=VIDEO_ID
+Keep the original video and also give me the final subtitled video.
+```
+
+Expected outputs:
+- original video in `source/`
+- Chinese subtitle files in `subtitles/`
+- burned Chinese video in `renders/`
+- summary file in `summary/`
+
+### 3. Subtitle files only
+
+```text
+YouTube Video Packager, download this video:
+https://www.youtube.com/watch?v=VIDEO_ID
+I only want the English and Chinese subtitle files. Do not burn subtitles into the video.
+```
+
+Expected outputs:
+- original video in `source/`
+- English and Chinese subtitle files in `subtitles/`
+- summary file in `summary/`
+
+### 4. Traditional Chinese request
+
+```text
+YouTube Video Packager，幫我下載這支影片，並配上繁體中文字幕：
+https://www.youtube.com/watch?v=VIDEO_ID
+保留原影片，也輸出最終帶字幕影片。
+```
+
+Expected behavior:
+- prefer `zh-Hant`
+- keep the original video
+- output the burned traditional Chinese version
+
+### 5. Xiaohongshu export
+
+```text
+YouTube Video Packager, download this video, add Chinese subtitles, and export a Xiaohongshu 3:4 version:
+https://www.youtube.com/watch?v=VIDEO_ID
+```
+
+Expected outputs:
+- `source/<video_slug>.mp4`
+- `subtitles/<video_slug>.<lang>.srt`
+- `subtitles/<video_slug>.<lang>.xiaohongshu-3x4.ass`
+- `renders/<video_slug>.xiaohongshu-3x4.<lang>.burned.mp4`
+- `summary/<video_slug>.summary.md`
 
 ## Adding a new skill
 

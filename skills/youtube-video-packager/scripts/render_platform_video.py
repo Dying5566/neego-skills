@@ -78,6 +78,8 @@ def main() -> None:
     parser.add_argument("--preset", required=True, choices=["original", "xiaohongshu-3x4", "vertical-9x16"])
     parser.add_argument("--background", default="black", choices=["black", "blur"])
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--video-slug")
+    parser.add_argument("--lang-tag")
     args = parser.parse_args()
 
     video = Path(args.video).expanduser().resolve()
@@ -93,6 +95,10 @@ def main() -> None:
     ffprobe_bin = pick_binary(FFPROBE_CANDIDATES)
     duration = probe_duration(video, ffprobe_bin)
     extra_args, filename = build_filter(video, subtitle_ass, args.preset, args.background, duration)
+    if args.video_slug and args.lang_tag:
+        filename = f"{args.video_slug}.{args.preset}.{args.lang_tag}.burned.mp4"
+    elif args.video_slug:
+        filename = f"{args.video_slug}.{args.preset}.burned.mp4"
     output_path = output_dir / filename
 
     cmd = [ffmpeg_bin, "-y", *extra_args, "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", str(output_path)]
