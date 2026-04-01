@@ -1,5 +1,7 @@
 # neego-skills
 
+[中文说明](./README.zh-CN.md)
+
 A public-ready multi-skill repository for creator and media workflows.
 
 This repository is organized so each skill can be developed locally, copied into a Codex skills directory, and published to GitHub without changing the structure later.
