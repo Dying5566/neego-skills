@@ -11,6 +11,9 @@ This repository is organized so each skill can be developed locally, copied into
 ```text
 neego-skills/
 ├── README.md
+├── claude-code/
+│   └── commands/
+│       └── youtube-video-packager.md
 ├── skills/
 │   └── youtube-video-packager/
 │       ├── SKILL.md
@@ -47,6 +50,24 @@ Or symlink it during development:
 
 ```bash
 ln -s "$(pwd)/skills/youtube-video-packager" ~/.codex/skills/youtube-video-packager
+```
+
+## Use With Claude Code
+
+This repository also includes a Claude Code slash command version:
+
+- `claude-code/commands/youtube-video-packager.md`
+
+To use it in Claude Code, copy or symlink that file into:
+
+```bash
+~/.claude/commands/
+```
+
+Then invoke it with:
+
+```text
+/youtube-video-packager
 ```
 
 ## Example workflow

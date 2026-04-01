@@ -13,6 +13,9 @@
 neego-skills/
 ├── README.md
 ├── README.zh-CN.md
+├── claude-code/
+│   └── commands/
+│       └── youtube-video-packager.md
 ├── skills/
 │   └── youtube-video-packager/
 │       ├── SKILL.md
@@ -54,6 +57,24 @@ cp -R skills/youtube-video-packager ~/.codex/skills/
 
 ```bash
 ln -s "$(pwd)/skills/youtube-video-packager" ~/.codex/skills/youtube-video-packager
+```
+
+## 给 Claude Code 使用
+
+这个仓库现在也附带了一个 Claude Code 的 slash command 版本：
+
+- `claude-code/commands/youtube-video-packager.md`
+
+要在 Claude Code 里使用，可以把它复制或软链接到：
+
+```bash
+~/.claude/commands/
+```
+
+然后通过下面这种方式调用：
+
+```text
+/youtube-video-packager
 ```
 
 ## 工作流示例
