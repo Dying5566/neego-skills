@@ -9,6 +9,8 @@ import textwrap
 from dataclasses import dataclass
 from pathlib import Path
 
+from path_policy import resolve_output_dir
+
 
 @dataclass
 class Cue:
@@ -179,16 +181,6 @@ def infer_video_slug(path: Path) -> str:
     return stem
 
 
-def resolve_output_dir(base_dir: Path, leaf: str, video_slug: str | None) -> Path:
-    if base_dir.name == leaf:
-        return base_dir
-    if video_slug:
-        if base_dir.name == video_slug:
-            return base_dir / leaf
-        return base_dir / video_slug / leaf
-    return base_dir / leaf
-
-
 def wrap_text(value: str, language: str, preset: str) -> str:
     if language == "zh":
         widths = {
@@ -225,6 +217,7 @@ def main() -> None:
     parser.add_argument("--emit-ass", action="store_true")
     parser.add_argument("--zh-srt")
     parser.add_argument("--en-srt")
+    parser.add_argument("--dir-language", choices=["en", "zh-Hans", "zh-Hant"], default="en")
     args = parser.parse_args()
 
     inferred_slug = args.video_slug
@@ -232,7 +225,7 @@ def main() -> None:
         source_hint = args.zh_srt or args.en_srt
         if source_hint:
             inferred_slug = infer_video_slug(Path(source_hint).expanduser().resolve())
-    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles", inferred_slug)
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles", inferred_slug, args.dir_language)
     output_dir.mkdir(parents=True, exist_ok=True)
     created: list[str] = []
 

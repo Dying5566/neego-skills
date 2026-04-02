@@ -8,6 +8,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from path_policy import resolve_output_dir
+
 
 LANGUAGE_MAP = {
     "zh": ["zh-Hans", "zh-Hant"],
@@ -47,16 +49,6 @@ def detect_selected_script(files: list[str]) -> str | None:
         if ".zh-Hant." in name or name.endswith(".zh-Hant.srt"):
             return "zh-Hant"
     return None
-
-
-def resolve_output_dir(base_dir: Path, leaf: str, video_slug: str | None) -> Path:
-    if base_dir.name == leaf:
-        return base_dir
-    if video_slug:
-        if base_dir.name == video_slug:
-            return base_dir / leaf
-        return base_dir / video_slug / leaf
-    return base_dir / leaf
 
 
 def download_subs(url: str, languages: list[str], output_dir: Path, video_slug: str | None) -> list[str]:
@@ -100,6 +92,7 @@ def main() -> None:
     parser.add_argument("--script-preference", choices=["zh-Hans", "zh-Hant"])
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--video-slug")
+    parser.add_argument("--dir-language", choices=["en", "zh-Hans", "zh-Hant"], default="en")
     args = parser.parse_args()
 
     if args.subtitle_mode == "none":
@@ -108,7 +101,7 @@ def main() -> None:
 
     ensure_binary("yt-dlp")
     video_slug = args.video_slug or Path(args.video).expanduser().resolve().stem
-    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles", video_slug)
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles", video_slug, args.dir_language)
     output_dir.mkdir(parents=True, exist_ok=True)
     subtitle_listing = list_subs(args.url)
     languages = pick_languages(args.subtitle_mode, args.script_preference)

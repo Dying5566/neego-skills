@@ -25,15 +25,21 @@ Use the `youtube-video-packager` workflow for YouTube packaging requests.
 - If the user explicitly says they only want subtitle files, skip the burned video.
 - If the user asks for a Xiaohongshu version or a short-video version and does not specify background, default to pure black background.
 - For Xiaohongshu or short-video single-language Chinese subtitle outputs, default Chinese subtitle size is `50`.
+- Use `原视频 / 字幕 / 成片` for simplified Chinese requests, `原影片 / 字幕 / 成片` for traditional Chinese requests, otherwise keep `source / subtitles / renders`.
 - For single-language subtitle outputs, wrap long lines before writing cleaned subtitle files and burned renders.
 
 ## Output Structure
 
 Create one root directory per video slug:
 
-- `<output_root>/<video_slug>/source/`
-- `<output_root>/<video_slug>/subtitles/`
-- `<output_root>/<video_slug>/renders/`
+- Chinese request:
+  - localized source directory
+  - localized subtitle directory
+  - localized render directory
+- English or fallback:
+  - `<output_root>/<video_slug>/source/`
+  - `<output_root>/<video_slug>/subtitles/`
+  - `<output_root>/<video_slug>/renders/`
 
 If a script is given `<output_root>/<video_slug>` instead of one of those leaf directories, it should still create and use the correct leaf directory automatically.
 

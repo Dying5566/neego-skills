@@ -131,19 +131,19 @@ ln -s "$(pwd)/claude-code/commands/youtube-video-packager.md" ~/.claude/commands
 ```text
 outputs/
 └── example-video/
-    ├── source/
+    ├── 原视频/
     │   └── example-video.mp4
-    ├── subtitles/
+    ├── 字幕/
     │   ├── example-video.zh-Hans.srt
     │   └── example-video.zh-Hans.xiaohongshu-3x4.ass
-    ├── renders/
+    ├── 成片/
     │   └── example-video.xiaohongshu-3x4.zh-Hans.burned.mp4
 ```
 
 目录职责固定如下：
-- `source/`：原视频
-- `subtitles/`：字幕文件
-- `renders/`：烧录版或平台成片
+- 简体中文请求：`原视频 / 字幕 / 成片`
+- 繁体中文请求：`原影片 / 字幕 / 成片`
+- 英文请求：`source / subtitles / renders`
 
 ## 示例命令
 
@@ -152,7 +152,8 @@ outputs/
 ```bash
 python3 skills/youtube-video-packager/scripts/download_youtube.py \
   --url "https://www.youtube.com/watch?v=VIDEO_ID" \
-  --output-dir ./outputs/example-video/source \
+  --output-dir ./outputs/example-video \
+  --dir-language zh-Hans \
   --video-slug example-video
 ```
 
@@ -161,11 +162,12 @@ python3 skills/youtube-video-packager/scripts/download_youtube.py \
 ```bash
 python3 skills/youtube-video-packager/scripts/fetch_or_prepare_subtitles.py \
   --url "https://www.youtube.com/watch?v=VIDEO_ID" \
-  --video ./outputs/example-video/source/example-video.mp4 \
+  --video ./outputs/example-video/原视频/example-video.mp4 \
   --subtitle-mode zh \
   --subtitle-source ask_if_missing \
   --script-preference zh-Hans \
-  --output-dir ./outputs/example-video/subtitles \
+  --output-dir ./outputs/example-video \
+  --dir-language zh-Hans \
   --video-slug example-video
 ```
 
@@ -174,8 +176,9 @@ python3 skills/youtube-video-packager/scripts/fetch_or_prepare_subtitles.py \
 ```bash
 python3 skills/youtube-video-packager/scripts/compose_subtitles.py \
   --subtitle-mode zh \
-  --zh-srt ./outputs/example-video/subtitles/example-video.zh-Hans.srt \
-  --output-dir ./outputs/example-video/subtitles \
+  --zh-srt ./outputs/example-video/字幕/example-video.zh-Hans.srt \
+  --output-dir ./outputs/example-video \
+  --dir-language zh-Hans \
   --video-slug example-video \
   --lang-tag zh-Hans \
   --preset xiaohongshu-3x4 \
@@ -186,13 +189,14 @@ python3 skills/youtube-video-packager/scripts/compose_subtitles.py \
 
 ```bash
 python3 skills/youtube-video-packager/scripts/render_platform_video.py \
-  --video ./outputs/example-video/source/example-video.mp4 \
-  --subtitle-ass ./outputs/example-video/subtitles/example-video.zh-Hans.xiaohongshu-3x4.ass \
+  --video ./outputs/example-video/原视频/example-video.mp4 \
+  --subtitle-ass ./outputs/example-video/字幕/example-video.zh-Hans.xiaohongshu-3x4.ass \
   --render-mode burn \
   --preset xiaohongshu-3x4 \
   --background black \
   --lang-tag zh-Hans \
-  --output-dir ./outputs/example-video/renders \
+  --output-dir ./outputs/example-video \
+  --dir-language zh-Hans \
   --video-slug example-video
 ```
 
@@ -251,12 +255,13 @@ https://www.youtube.com/watch?v=VIDEO_ID
 - 当用户说“配上中文字幕”时，默认理解为：输出带中文字幕的最终视频
 - 如果用户明确说“只要字幕文件”，才不做烧录
 - 如果无法判断用户要简体还是繁体，默认使用简体中文
+- 中文用户默认使用本地化目录名：简体是 `原视频 / 字幕 / 成片`，繁体是 `原影片 / 字幕 / 成片`
 - 如果用户要小红书版或短视频版，但没有明确指定背景，默认使用纯黑背景
 - 如果用户要小红书版或短视频版，但没有明确指定字幕字号，默认中文字幕字号使用 `50`
 - 如果脚本收到的是 `<output_root>/<video_slug>` 而不是 `source/`、`subtitles/`、`renders/` 这些叶子目录，脚本也会自动创建并写入正确的子目录
 - 单语字幕过长时，会在生成 `clean.srt` 和烧录 `ass` 前自动换行
 - 如果用户要求配字幕或导出成片，但没有明确某一个视频，就处理当前工作目录里所有受支持的视频文件
-- 如果下载 YouTube 视频时没有手动指定 slug，最外层目录会按视频标题的缩写自动生成
+- 如果下载 YouTube 视频时没有手动指定 slug，最外层目录会按短标题词组自动生成
 - 平台成片场景下，烧录字幕会固定贴在视频内容画面内部靠下的位置
 - 如果用户既要求配字幕，又要求小红书版或短视频版，默认要同时产出两份烧录视频：一份原比例烧录版，一份平台成片版
 

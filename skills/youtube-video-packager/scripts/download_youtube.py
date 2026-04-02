@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import shutil
 import subprocess
 from pathlib import Path
+
+from path_policy import abbreviate_title, resolve_output_dir
 
 
 YT_DLP_BASE = ["yt-dlp", "--cookies-from-browser", "chrome", "--no-playlist"]
@@ -49,14 +50,6 @@ def discover_output(output_dir: Path) -> Path | None:
     return None
 
 
-def abbreviate_title(title: str, limit: int = 36) -> str:
-    value = re.sub(r"[^\w\u4e00-\u9fff-]+", "-", title, flags=re.UNICODE)
-    value = re.sub(r"-{2,}", "-", value).strip("-_")
-    if not value:
-        return "video"
-    return value[:limit].rstrip("-_") or "video"
-
-
 def fetch_video_title(url: str) -> str:
     commands = [
         YT_DLP_BASE + ["--print", "%(title)s", "--skip-download", url],
@@ -73,16 +66,6 @@ def fetch_video_title(url: str) -> str:
     return "video"
 
 
-def resolve_output_dir(base_dir: Path, leaf: str, video_slug: str | None) -> Path:
-    if base_dir.name == leaf:
-        return base_dir
-    if video_slug:
-        if base_dir.name == video_slug:
-            return base_dir / leaf
-        return base_dir / video_slug / leaf
-    return base_dir / leaf
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Download a YouTube video while preserving the original source")
     parser.add_argument("--url", required=True)
@@ -91,11 +74,12 @@ def main() -> None:
     parser.add_argument("--quality", default="best", choices=sorted(QUALITY_MAP))
     parser.add_argument("--format", dest="format_type", default="mp4", choices=["mp4", "webm", "mkv"])
     parser.add_argument("--audio-only", action="store_true")
+    parser.add_argument("--dir-language", choices=["en", "zh-Hans", "zh-Hant"], default="en")
     args = parser.parse_args()
 
     ensure_binary("yt-dlp")
     video_slug = args.video_slug or abbreviate_title(fetch_video_title(args.url))
-    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "source", video_slug)
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "source", video_slug, args.dir_language)
     output_dir.mkdir(parents=True, exist_ok=True)
     template_name = f"{video_slug}.%(ext)s"
     template = str(output_dir / template_name)

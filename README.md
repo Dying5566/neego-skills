@@ -123,13 +123,16 @@ Example output layout:
 ```text
 outputs/
 └── example-video/
-    ├── source/
+    ├── source/            # English requests
     │   └── example-video.mp4
     ├── subtitles/
     │   ├── example-video.zh-Hans.srt
     │   └── example-video.zh-Hans.xiaohongshu-3x4.ass
     ├── renders/
     │   └── example-video.xiaohongshu-3x4.zh-Hans.burned.mp4
+    ├── 原视频/            # Simplified Chinese requests
+    ├── 字幕/
+    └── 成片/
 ```
 
 Example commands:
@@ -177,7 +180,8 @@ Default behavior note:
 - If a script receives a video root directory instead of `source/`, `subtitles/`, or `renders/`, it should create and use the correct leaf directory automatically.
 - For single-language subtitle outputs, wrap long lines before writing cleaned subtitle files and burned renders.
 - If the user asks to add subtitles or render outputs but does not identify a single video, process all supported local video files in the current working directory.
-- If no slug is provided for a YouTube download, the skill should derive the outer folder name from an abbreviated version of the video title.
+- Use `原视频 / 字幕 / 成片` for simplified Chinese requests, `原影片 / 字幕 / 成片` for traditional Chinese requests, otherwise keep `source / subtitles / renders`.
+- If no slug is provided for a YouTube download, the skill should derive the outer folder name from a short title phrase rather than a long title truncation.
 - For platform presets, keep burned subtitles fixed inside the visible video content area near the bottom.
 - If the user asks for subtitles and also asks for a Xiaohongshu or short-video export, produce both an original-layout burned video and the platform preset burned video by default.
 
@@ -194,7 +198,7 @@ Keep the original video only.
 ```
 
 Expected outputs:
-- `source/<video_slug>.mp4`
+- localized source directory + `<video_slug>.mp4`
 
 ### 2. Download and add simplified Chinese subtitles
 
@@ -205,9 +209,9 @@ Keep the original video and also give me the final subtitled video.
 ```
 
 Expected outputs:
-- original video in `source/`
-- Chinese subtitle files in `subtitles/`
-- burned Chinese video in `renders/`
+- original video in the localized source directory
+- Chinese subtitle files in the localized subtitle directory
+- burned Chinese video in the localized render directory
 - wrapped single-language subtitle lines in the generated `clean.srt` and `ass`
 
 ### 3. Subtitle files only
@@ -219,8 +223,8 @@ I only want the English and Chinese subtitle files. Do not burn subtitles into t
 ```
 
 Expected outputs:
-- original video in `source/`
-- English and Chinese subtitle files in `subtitles/`
+- original video in the localized source directory
+- English and Chinese subtitle files in the localized subtitle directory
 
 ### 4. Traditional Chinese request
 
@@ -243,10 +247,10 @@ https://www.youtube.com/watch?v=VIDEO_ID
 ```
 
 Expected outputs:
-- `source/<video_slug>.mp4`
-- `subtitles/<video_slug>.<lang>.srt`
-- `subtitles/<video_slug>.<lang>.xiaohongshu-3x4.ass`
-- `renders/<video_slug>.xiaohongshu-3x4.<lang>.burned.mp4`
+- localized source directory + `<video_slug>.mp4`
+- localized subtitle directory + `<video_slug>.<lang>.srt`
+- localized subtitle directory + `<video_slug>.<lang>.xiaohongshu-3x4.ass`
+- localized render directory + `<video_slug>.xiaohongshu-3x4.<lang>.burned.mp4`
 
 ## Adding a new skill
 

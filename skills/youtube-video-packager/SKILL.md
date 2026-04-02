@@ -22,6 +22,7 @@ Use this skill for end-to-end YouTube packaging workflows: download the original
    - If the request uses simplified Chinese, prefer `zh-Hans`.
    - If the request uses traditional Chinese, prefer `zh-Hant`.
    - If the request does not make the script obvious, default to `zh-Hans`.
+   - Use the same language choice to decide output directory labels: `原视频 / 字幕 / 成片` for simplified Chinese, `原影片 / 字幕 / 成片` for traditional Chinese, otherwise `source / subtitles / renders`.
    - If subtitles are missing and `subtitle_source=ask_if_missing`, stop and ask whether Whisper should be used.
    - If the user already requested Whisper, run it only after the original video exists locally.
 4. Normalize subtitle assets with `scripts/compose_subtitles.py`.
@@ -64,18 +65,23 @@ Always preserve the original downloaded video.
 
 Create one root output directory per video slug:
 
-- `<output_root>/<video_slug>/source/`
-- `<output_root>/<video_slug>/subtitles/`
-- `<output_root>/<video_slug>/renders/`
+- Chinese request:
+  - `<output_root>/<video_slug>/原视频/` or `<output_root>/<video_slug>/原影片/`
+  - `<output_root>/<video_slug>/字幕/`
+  - `<output_root>/<video_slug>/成片/`
+- English or fallback:
+  - `<output_root>/<video_slug>/source/`
+  - `<output_root>/<video_slug>/subtitles/`
+  - `<output_root>/<video_slug>/renders/`
 
-If the workflow starts from a YouTube URL and no slug is provided, derive the outer folder name from an abbreviated version of the video title and use that same slug for all files under `source/`, `subtitles/`, and `renders/`.
+If the workflow starts from a YouTube URL and no slug is provided, derive the outer folder name from a short title phrase and use that same slug for all files under the localized source, subtitle, and render directories.
 
 Use these fixed output types:
 
-- `source/<video_slug>.mp4` for the original video
-- `subtitles/<video_slug>.<lang>.srt` for standalone subtitles
-- `subtitles/<video_slug>.<lang>.<preset>.ass` for styled subtitles
-- `renders/<video_slug>.<preset>.<lang>.burned.mp4` for burned outputs
+- localized source directory + `<video_slug>.mp4` for the original video
+- localized subtitle directory + `<video_slug>.<lang>.srt` for standalone subtitles
+- localized subtitle directory + `<video_slug>.<lang>.<preset>.ass` for styled subtitles
+- localized render directory + `<video_slug>.<preset>.<lang>.burned.mp4` for burned outputs
 - for Xiaohongshu or short-video exports, use black background and default Chinese subtitle size `50` unless the user explicitly overrides them
 
 ## Scripts
@@ -90,11 +96,11 @@ Fetches YouTube subtitles when available. If subtitles are missing and `subtitle
 
 ### `scripts/compose_subtitles.py`
 
-Creates cleaned subtitle assets for `zh`, `en`, or `bilingual` outputs. Use `--emit-ass` when the next step is a burned-subtitle render. Outputs must go into the fixed `subtitles/` directory.
+Creates cleaned subtitle assets for `zh`, `en`, or `bilingual` outputs. Use `--emit-ass` when the next step is a burned-subtitle render. Outputs must go into the localized subtitle directory.
 
 ### `scripts/render_platform_video.py`
 
-Renders the final preset output into the fixed `renders/` directory. Use `original` when the layout should stay unchanged, `xiaohongshu-3x4` for `1080x1440`, and `vertical-9x16` for `1080x1920`.
+Renders the final preset output into the localized render directory. Use `original` when the layout should stay unchanged, `xiaohongshu-3x4` for `1080x1440`, and `vertical-9x16` for `1080x1920`.
 
 ## Important Boundaries
 

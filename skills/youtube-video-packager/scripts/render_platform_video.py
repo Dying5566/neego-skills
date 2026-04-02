@@ -8,6 +8,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from path_policy import resolve_output_dir
+
 
 FFMPEG_CANDIDATES = [
     "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg",
@@ -72,16 +74,6 @@ def probe_dimensions(video: Path, ffprobe_bin: str) -> tuple[int, int]:
 
 def infer_video_slug(base_dir: Path, video: Path, explicit_slug: str | None) -> str:
     return explicit_slug or video.stem or base_dir.name or "video"
-
-
-def resolve_output_dir(base_dir: Path, leaf: str, video_slug: str | None) -> Path:
-    if base_dir.name == leaf:
-        return base_dir
-    if video_slug:
-        if base_dir.name == video_slug:
-            return base_dir / leaf
-        return base_dir / video_slug / leaf
-    return base_dir / leaf
 
 
 def build_style_updates(preset: str, video_size: tuple[int, int]) -> dict[str, tuple[int, int]]:
@@ -164,12 +156,13 @@ def main() -> None:
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--video-slug")
     parser.add_argument("--lang-tag")
+    parser.add_argument("--dir-language", choices=["en", "zh-Hans", "zh-Hant"], default="en")
     args = parser.parse_args()
 
     video = Path(args.video).expanduser().resolve()
     subtitle_ass = Path(args.subtitle_ass).expanduser().resolve()
     video_slug = infer_video_slug(Path(args.output_dir).expanduser().resolve(), video, args.video_slug)
-    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "renders", video_slug)
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "renders", video_slug, args.dir_language)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if args.render_mode == "none":
