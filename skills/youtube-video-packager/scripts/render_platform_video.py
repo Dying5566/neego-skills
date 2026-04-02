@@ -51,7 +51,7 @@ def probe_duration(video: Path, ffprobe_bin: str) -> float:
 def build_filter(video: Path, subtitle_ass: Path, preset: str, background: str, duration: float) -> tuple[list[str], str]:
     if preset == "original":
         vf = f"ass={subtitle_ass}"
-        return ["-vf", vf], video.stem + ".burned.mp4"
+        return ["-i", str(video), "-vf", vf], video.stem + ".burned.mp4"
 
     size = PRESETS[preset]["size"]
     canvas_w, canvas_h = size.split("x")
