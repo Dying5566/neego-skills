@@ -32,7 +32,6 @@ neego-skills/
 这个 skill 用来完成一整套 YouTube 视频打包流程：
 - 下载原始 YouTube 视频
 - 获取或生成字幕
-- 根据字幕生成一份简要内容总结
 - 输出带字幕的视频成品
 - 同时始终保留原视频
 
@@ -43,7 +42,6 @@ neego-skills/
 - 根据用户提问习惯优先选择简体或繁体中文字幕
 - 输出 `srt` / `ass` 字幕文件
 - 输出 `original`、`xiaohongshu-3x4`、`vertical-9x16` 三种成片预设
-- 基于字幕内容生成视频总结
 
 ## 本地安装到 Codex
 
@@ -123,8 +121,7 @@ ln -s "$(pwd)/claude-code/commands/youtube-video-packager.md" ~/.claude/commands
 2. 检查 YouTube 是否已有可用字幕
 3. 下载字幕，或者在缺字幕时询问是否启用 Whisper
 4. 生成清洗后的字幕资产
-5. 根据字幕生成一份视频总结
-6. 导出原始版或平台成片版
+5. 导出原始版或平台成片版
 
 ## 输出目录约定
 
@@ -140,15 +137,12 @@ outputs/
     │   └── example-video.zh-Hans.xiaohongshu-3x4.ass
     ├── renders/
     │   └── example-video.xiaohongshu-3x4.zh-Hans.burned.mp4
-    └── summary/
-        └── example-video.summary.md
 ```
 
 目录职责固定如下：
 - `source/`：原视频
 - `subtitles/`：字幕文件
 - `renders/`：烧录版或平台成片
-- `summary/`：视频内容总结
 
 ## 示例命令
 
@@ -187,16 +181,7 @@ python3 skills/youtube-video-packager/scripts/compose_subtitles.py \
   --emit-ass
 ```
 
-### 4. 生成视频总结
-
-```bash
-python3 skills/youtube-video-packager/scripts/summarize_from_subtitles.py \
-  --subtitle ./outputs/example-video/subtitles/example-video.zh-Hans.clean.srt \
-  --output-dir ./outputs/example-video/summary \
-  --video-slug example-video
-```
-
-### 5. 导出带字幕的小红书版本
+### 4. 导出带字幕的小红书版本
 
 ```bash
 python3 skills/youtube-video-packager/scripts/render_platform_video.py \
@@ -232,7 +217,6 @@ https://www.youtube.com/watch?v=VIDEO_ID
 - 原视频
 - 中文字幕文件
 - 烧录字幕版视频
-- 视频内容总结
 
 ### 示例 3：只要字幕文件
 
@@ -265,7 +249,8 @@ https://www.youtube.com/watch?v=VIDEO_ID
 - 当用户说“配上中文字幕”时，默认理解为：输出带中文字幕的最终视频
 - 如果用户明确说“只要字幕文件”，才不做烧录
 - 如果无法判断用户要简体还是繁体，默认使用简体中文
-- 视频内容总结默认开启，只要拿到了可用字幕就会生成
+- 如果用户要小红书版或短视频版，但没有明确指定背景，默认使用纯黑背景
+- 如果用户要小红书版或短视频版，但没有明确指定字幕字号，默认中文字幕字号使用 `50`
 
 ## 新增 skill
 

@@ -27,7 +27,7 @@ neego-skills/
 
 ### `youtube-video-packager`
 
-Download a YouTube video, prepare subtitles, generate a short video summary, and export platform-ready deliverables while always keeping the original video.
+Download a YouTube video, prepare subtitles, and export platform-ready deliverables while always keeping the original video.
 
 Capabilities:
 - Download the original YouTube video with `yt-dlp`
@@ -35,7 +35,6 @@ Capabilities:
 - Stop and ask before using Whisper when subtitles are missing
 - Infer simplified or traditional Chinese subtitle preference from the user's wording
 - Build `srt` or `ass` subtitle assets for `zh`, `en`, and `bilingual`
-- Generate a concise summary from subtitle content
 - Export subtitled outputs for `original`, `xiaohongshu-3x4`, and `vertical-9x16`
 
 ## Install a skill locally
@@ -116,8 +115,7 @@ ln -s "$(pwd)/claude-code/commands/youtube-video-packager.md" ~/.claude/commands
 2. Check whether YouTube already provides subtitles.
 3. Download subtitles or stop and ask whether Whisper should be used.
 4. Compose clean subtitle assets.
-5. Generate a concise summary from subtitles.
-6. Export either the original layout or a platform preset with burned subtitles.
+5. Export either the original layout or a platform preset with burned subtitles.
 
 Example output layout:
 
@@ -131,8 +129,6 @@ outputs/
     │   └── example-video.zh-Hans.xiaohongshu-3x4.ass
     ├── renders/
     │   └── example-video.xiaohongshu-3x4.zh-Hans.burned.mp4
-    └── summary/
-        └── example-video.summary.md
 ```
 
 Example commands:
@@ -161,11 +157,6 @@ python3 skills/youtube-video-packager/scripts/compose_subtitles.py \
   --preset xiaohongshu-3x4 \
   --emit-ass
 
-python3 skills/youtube-video-packager/scripts/summarize_from_subtitles.py \
-  --subtitle ./outputs/example-video/subtitles/example-video.zh-Hans.clean.srt \
-  --output-dir ./outputs/example-video/summary \
-  --video-slug example-video
-
 python3 skills/youtube-video-packager/scripts/render_platform_video.py \
   --video ./outputs/example-video/source/example-video.mp4 \
   --subtitle-ass ./outputs/example-video/subtitles/example-video.zh-Hans.xiaohongshu-3x4.ass \
@@ -180,6 +171,8 @@ python3 skills/youtube-video-packager/scripts/render_platform_video.py \
 Default behavior note:
 - If the user says “配上中文字幕”, the skill should treat that as a request for a final burned-subtitle video by default.
 - If the user only wants subtitle files, they should say so explicitly.
+- If the user asks for a Xiaohongshu version or a short-video version and does not specify background, default to a pure black background.
+- For Xiaohongshu or short-video single-language Chinese subtitle outputs, default Chinese subtitle size is `50`.
 
 ## Example requests
 
@@ -208,7 +201,6 @@ Expected outputs:
 - original video in `source/`
 - Chinese subtitle files in `subtitles/`
 - burned Chinese video in `renders/`
-- summary file in `summary/`
 
 ### 3. Subtitle files only
 
@@ -221,7 +213,6 @@ I only want the English and Chinese subtitle files. Do not burn subtitles into t
 Expected outputs:
 - original video in `source/`
 - English and Chinese subtitle files in `subtitles/`
-- summary file in `summary/`
 
 ### 4. Traditional Chinese request
 
@@ -248,7 +239,6 @@ Expected outputs:
 - `subtitles/<video_slug>.<lang>.srt`
 - `subtitles/<video_slug>.<lang>.xiaohongshu-3x4.ass`
 - `renders/<video_slug>.xiaohongshu-3x4.<lang>.burned.mp4`
-- `summary/<video_slug>.summary.md`
 
 ## Adding a new skill
 
