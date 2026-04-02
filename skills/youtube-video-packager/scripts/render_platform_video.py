@@ -95,11 +95,11 @@ def build_style_updates(preset: str, video_size: tuple[int, int]) -> dict[str, t
     bottom_gap = max((canvas_h - visible_h) // 2, 0)
 
     if preset == "xiaohongshu-3x4":
-        en_margin = bottom_gap + 52
-        zh_margin = en_margin + 68
+        en_margin = bottom_gap + 46
+        zh_margin = en_margin + 60
     else:
-        en_margin = bottom_gap + 68
-        zh_margin = en_margin + 84
+        en_margin = bottom_gap + 48
+        zh_margin = en_margin + 64
 
     return {
         "Default": (2, zh_margin),
