@@ -177,6 +177,8 @@ Default behavior note:
 - If a script receives a video root directory instead of `source/`, `subtitles/`, or `renders/`, it should create and use the correct leaf directory automatically.
 - For single-language subtitle outputs, wrap long lines before writing cleaned subtitle files and burned renders.
 - If the user asks to add subtitles or render outputs but does not identify a single video, process all supported local video files in the current working directory.
+- If no slug is provided for a YouTube download, the skill should derive the outer folder name from an abbreviated version of the video title.
+- For platform presets, keep burned subtitles fixed inside the visible video content area near the bottom.
 
 ## Example requests
 

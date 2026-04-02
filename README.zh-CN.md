@@ -256,6 +256,8 @@ https://www.youtube.com/watch?v=VIDEO_ID
 - 如果脚本收到的是 `<output_root>/<video_slug>` 而不是 `source/`、`subtitles/`、`renders/` 这些叶子目录，脚本也会自动创建并写入正确的子目录
 - 单语字幕过长时，会在生成 `clean.srt` 和烧录 `ass` 前自动换行
 - 如果用户要求配字幕或导出成片，但没有明确某一个视频，就处理当前工作目录里所有受支持的视频文件
+- 如果下载 YouTube 视频时没有手动指定 slug，最外层目录会按视频标题的缩写自动生成
+- 平台成片场景下，烧录字幕会固定贴在视频内容画面内部靠下的位置
 
 ## 新增 skill
 

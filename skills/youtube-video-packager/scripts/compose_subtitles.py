@@ -171,8 +171,22 @@ def write_ass(cues: list[Cue], target: Path, preset: str, bilingual: bool) -> No
     target.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def resolve_output_dir(base_dir: Path, leaf: str) -> Path:
-    return base_dir if base_dir.name == leaf else base_dir / leaf
+def infer_video_slug(path: Path) -> str:
+    stem = path.stem
+    for suffix in (".zh-Hans", ".zh-Hant", ".en", ".en-orig", ".clean", ".bilingual"):
+        if stem.endswith(suffix):
+            return stem[: -len(suffix)]
+    return stem
+
+
+def resolve_output_dir(base_dir: Path, leaf: str, video_slug: str | None) -> Path:
+    if base_dir.name == leaf:
+        return base_dir
+    if video_slug:
+        if base_dir.name == video_slug:
+            return base_dir / leaf
+        return base_dir / video_slug / leaf
+    return base_dir / leaf
 
 
 def wrap_text(value: str, language: str, preset: str) -> str:
@@ -213,7 +227,12 @@ def main() -> None:
     parser.add_argument("--en-srt")
     args = parser.parse_args()
 
-    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles")
+    inferred_slug = args.video_slug
+    if not inferred_slug:
+        source_hint = args.zh_srt or args.en_srt
+        if source_hint:
+            inferred_slug = infer_video_slug(Path(source_hint).expanduser().resolve())
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles", inferred_slug)
     output_dir.mkdir(parents=True, exist_ok=True)
     created: list[str] = []
 
@@ -221,7 +240,7 @@ def main() -> None:
         if not args.zh_srt:
             raise SystemExit("--zh-srt is required for zh mode")
         source = Path(args.zh_srt).expanduser().resolve()
-        base_name = f"{args.video_slug}.{args.lang_tag}" if args.video_slug and args.lang_tag else source.stem
+        base_name = f"{inferred_slug}.{args.lang_tag}" if inferred_slug and args.lang_tag else source.stem
         srt_target = output_dir / f"{base_name}.clean.srt"
         cues = normalize_single_language_cues(parse_srt(source), "zh", args.preset)
         write_srt(cues, srt_target)
@@ -234,7 +253,7 @@ def main() -> None:
         if not args.en_srt:
             raise SystemExit("--en-srt is required for en mode")
         source = Path(args.en_srt).expanduser().resolve()
-        base_name = f"{args.video_slug}.{args.lang_tag}" if args.video_slug and args.lang_tag else source.stem
+        base_name = f"{inferred_slug}.{args.lang_tag}" if inferred_slug and args.lang_tag else source.stem
         srt_target = output_dir / f"{base_name}.clean.srt"
         cues = normalize_single_language_cues(parse_srt(source), "en", args.preset)
         write_srt(cues, srt_target)
@@ -249,7 +268,7 @@ def main() -> None:
         en_cues = parse_srt(Path(args.en_srt).expanduser().resolve())
         zh_cues = parse_srt(Path(args.zh_srt).expanduser().resolve())
         cues = build_bilingual_cues(en_cues, zh_cues, args.preset)
-        base_name = f"{args.video_slug}.bilingual" if args.video_slug else "bilingual-clean"
+        base_name = f"{inferred_slug}.bilingual" if inferred_slug else "bilingual-clean"
         srt_target = output_dir / f"{base_name}.srt"
         write_srt(cues, srt_target)
         created.append(str(srt_target))

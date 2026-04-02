@@ -49,6 +49,16 @@ def detect_selected_script(files: list[str]) -> str | None:
     return None
 
 
+def resolve_output_dir(base_dir: Path, leaf: str, video_slug: str | None) -> Path:
+    if base_dir.name == leaf:
+        return base_dir
+    if video_slug:
+        if base_dir.name == video_slug:
+            return base_dir / leaf
+        return base_dir / video_slug / leaf
+    return base_dir / leaf
+
+
 def download_subs(url: str, languages: list[str], output_dir: Path, video_slug: str | None) -> list[str]:
     cmd = [
         "yt-dlp",
@@ -70,10 +80,6 @@ def download_subs(url: str, languages: list[str], output_dir: Path, video_slug: 
     ]
     run(cmd)
     return sorted(str(path) for path in output_dir.glob("*.srt"))
-
-
-def resolve_output_dir(base_dir: Path, leaf: str) -> Path:
-    return base_dir if base_dir.name == leaf else base_dir / leaf
 
 
 def run_whisper(video: Path, output_dir: Path, language: str | None) -> list[str]:
@@ -101,18 +107,20 @@ def main() -> None:
         return
 
     ensure_binary("yt-dlp")
-    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles")
+    video_slug = args.video_slug or Path(args.video).expanduser().resolve().stem
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles", video_slug)
     output_dir.mkdir(parents=True, exist_ok=True)
     subtitle_listing = list_subs(args.url)
     languages = pick_languages(args.subtitle_mode, args.script_preference)
     found_on_youtube = any(lang in subtitle_listing for lang in languages)
 
     if found_on_youtube:
-        files = download_subs(args.url, languages, output_dir, args.video_slug)
+        files = download_subs(args.url, languages, output_dir, video_slug)
         print(json.dumps({
             "status": "ok",
             "subtitle_source": "youtube",
             "files": files,
+            "video_slug": video_slug,
             "selected_script": detect_selected_script(files),
             "listed_subtitles": subtitle_listing.strip(),
         }, ensure_ascii=False, indent=2))
@@ -141,6 +149,7 @@ def main() -> None:
         "status": "ok",
         "subtitle_source": "whisper",
         "files": files,
+        "video_slug": video_slug,
         "selected_script": args.script_preference if args.subtitle_mode == "zh" else None,
         "listed_subtitles": subtitle_listing.strip(),
     }, ensure_ascii=False, indent=2))

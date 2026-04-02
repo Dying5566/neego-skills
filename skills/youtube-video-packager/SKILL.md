@@ -36,6 +36,7 @@ Use this skill for end-to-end YouTube packaging workflows: download the original
    - `preset=original | xiaohongshu-3x4 | vertical-9x16`
    - if the user asked for a Xiaohongshu version or a short-video version and did not specify a background, default to `background=black`
    - if the output is a Xiaohongshu version or short-video version and the user did not specify subtitle size, default to Chinese subtitle size `50`
+   - keep burned subtitles fixed inside the visible video content area near the bottom instead of letting them float in the outer canvas
    - `render_mode=none | burn`
 7. Return a concise summary that always includes:
    - whether the download succeeded
@@ -65,6 +66,8 @@ Create one root output directory per video slug:
 - `<output_root>/<video_slug>/source/`
 - `<output_root>/<video_slug>/subtitles/`
 - `<output_root>/<video_slug>/renders/`
+
+If the workflow starts from a YouTube URL and no slug is provided, derive the outer folder name from an abbreviated version of the video title and use that same slug for all files under `source/`, `subtitles/`, and `renders/`.
 
 Use these fixed output types:
 
