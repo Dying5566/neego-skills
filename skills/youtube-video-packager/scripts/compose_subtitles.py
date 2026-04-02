@@ -51,10 +51,16 @@ def parse_srt(path: Path) -> list[Cue]:
         return cues
     for block in content.split("\n\n"):
         lines = [line.rstrip() for line in block.splitlines()]
-        if len(lines) < 3:
+        if len(lines) < 2:
             continue
-        start_s, end_s = lines[1].split(" --> ")
-        body = " ".join(line.strip() for line in lines[2:] if line.strip())
+        ts_line = lines[1].strip()
+        if " --> " not in ts_line:
+            continue
+        body_lines = [line.strip() for line in lines[2:] if line.strip()]
+        if not body_lines:
+            continue
+        start_s, end_s = ts_line.split(" --> ", 1)
+        body = " ".join(body_lines)
         cues.append(Cue(parse_ts(start_s), parse_ts(end_s), body))
     return cues
 
