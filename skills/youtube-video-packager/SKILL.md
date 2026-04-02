@@ -37,6 +37,7 @@ Use this skill for end-to-end YouTube packaging workflows: download the original
    - if the user asked for a Xiaohongshu version or a short-video version and did not specify a background, default to `background=black`
    - if the output is a Xiaohongshu version or short-video version and the user did not specify subtitle size, default to Chinese subtitle size `50`
    - keep burned subtitles fixed inside the visible video content area near the bottom instead of letting them float in the outer canvas
+   - if the user asks for subtitles and also asks for a Xiaohongshu version or short-video version, export two burned videos by default: one `preset=original` deliverable and one platform preset deliverable
    - `render_mode=none | burn`
 7. Return a concise summary that always includes:
    - whether the download succeeded

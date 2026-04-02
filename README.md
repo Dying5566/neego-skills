@@ -179,6 +179,7 @@ Default behavior note:
 - If the user asks to add subtitles or render outputs but does not identify a single video, process all supported local video files in the current working directory.
 - If no slug is provided for a YouTube download, the skill should derive the outer folder name from an abbreviated version of the video title.
 - For platform presets, keep burned subtitles fixed inside the visible video content area near the bottom.
+- If the user asks for subtitles and also asks for a Xiaohongshu or short-video export, produce both an original-layout burned video and the platform preset burned video by default.
 
 ## Example requests
 
