@@ -116,6 +116,7 @@ ln -s "$(pwd)/claude-code/commands/youtube-video-packager.md" ~/.claude/commands
 3. Download subtitles or stop and ask whether Whisper should be used.
 4. Compose clean subtitle assets.
 5. Export either the original layout or a platform preset with burned subtitles.
+6. If the user asks to add subtitles or render outputs without naming one target video, process every supported local video file in the current working directory.
 
 Example output layout:
 
@@ -173,6 +174,9 @@ Default behavior note:
 - If the user only wants subtitle files, they should say so explicitly.
 - If the user asks for a Xiaohongshu version or a short-video version and does not specify background, default to a pure black background.
 - For Xiaohongshu or short-video single-language Chinese subtitle outputs, default Chinese subtitle size is `50`.
+- If a script receives a video root directory instead of `source/`, `subtitles/`, or `renders/`, it should create and use the correct leaf directory automatically.
+- For single-language subtitle outputs, wrap long lines before writing cleaned subtitle files and burned renders.
+- If the user asks to add subtitles or render outputs but does not identify a single video, process all supported local video files in the current working directory.
 
 ## Example requests
 
@@ -201,6 +205,7 @@ Expected outputs:
 - original video in `source/`
 - Chinese subtitle files in `subtitles/`
 - burned Chinese video in `renders/`
+- wrapped single-language subtitle lines in the generated `clean.srt` and `ass`
 
 ### 3. Subtitle files only
 

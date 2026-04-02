@@ -70,6 +70,10 @@ def build_filter(video: Path, subtitle_ass: Path, preset: str, background: str, 
     return prefix + ["-i", str(video), "-filter_complex", filter_complex, "-map", "[v]", "-map", "1:a:0?"], f"{video.stem}.{preset}.{background}.mp4"
 
 
+def resolve_output_dir(base_dir: Path, leaf: str) -> Path:
+    return base_dir if base_dir.name == leaf else base_dir / leaf
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Render platform-ready video outputs with burned subtitles")
     parser.add_argument("--video", required=True)
@@ -84,7 +88,7 @@ def main() -> None:
 
     video = Path(args.video).expanduser().resolve()
     subtitle_ass = Path(args.subtitle_ass).expanduser().resolve()
-    output_dir = Path(args.output_dir).expanduser().resolve()
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "renders")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if args.render_mode == "none":

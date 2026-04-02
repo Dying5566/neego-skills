@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import shutil
 import textwrap
 from dataclasses import dataclass
 from pathlib import Path
@@ -88,7 +87,7 @@ def write_srt(cues: list[Cue], target: Path) -> None:
     target.write_text("\n".join(blocks), encoding="utf-8")
 
 
-def build_bilingual_cues(en_cues: list[Cue], zh_cues: list[Cue], group_size: int = 2) -> list[Cue]:
+def build_bilingual_cues(en_cues: list[Cue], zh_cues: list[Cue], preset: str, group_size: int = 2) -> list[Cue]:
     zh_map = {cue_key(cue): cue for cue in zh_cues}
     total_groups = math.ceil(len(en_cues) / group_size)
     result: list[Cue] = []
@@ -105,7 +104,10 @@ def build_bilingual_cues(en_cues: list[Cue], zh_cues: list[Cue], group_size: int
             continue
         start = en_cues[start_idx].start
         end = en_cues[end_idx].start if end_idx < len(en_cues) else en_cues[end_idx - 1].end
-        body = "\n".join(filter(None, [wrap_zh("".join(zh_group)), wrap_en(" ".join(en_group))]))
+        body = "\n".join(filter(None, [
+            wrap_text("".join(zh_group), "zh", preset),
+            wrap_text(" ".join(en_group), "en", preset),
+        ]))
         result.append(Cue(start, end, body))
     return result
 
@@ -169,9 +171,34 @@ def write_ass(cues: list[Cue], target: Path, preset: str, bilingual: bool) -> No
     target.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def copy_if_needed(source: Path, target: Path) -> None:
-    if source.resolve() != target.resolve():
-        shutil.copy2(source, target)
+def resolve_output_dir(base_dir: Path, leaf: str) -> Path:
+    return base_dir if base_dir.name == leaf else base_dir / leaf
+
+
+def wrap_text(value: str, language: str, preset: str) -> str:
+    if language == "zh":
+        widths = {
+            "original": 18,
+            "xiaohongshu-3x4": 16,
+            "vertical-9x16": 16,
+        }
+        return wrap_zh(value, width=widths.get(preset, 18))
+    widths = {
+        "original": 40,
+        "xiaohongshu-3x4": 28,
+        "vertical-9x16": 26,
+    }
+    return wrap_en(value, width=widths.get(preset, 40))
+
+
+def normalize_single_language_cues(cues: list[Cue], language: str, preset: str) -> list[Cue]:
+    normalized: list[Cue] = []
+    for cue in cues:
+        text = clean_text(cue.text)
+        if not text:
+            continue
+        normalized.append(Cue(cue.start, cue.end, wrap_text(text, language, preset)))
+    return normalized
 
 
 def main() -> None:
@@ -186,7 +213,7 @@ def main() -> None:
     parser.add_argument("--en-srt")
     args = parser.parse_args()
 
-    output_dir = Path(args.output_dir).expanduser().resolve()
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles")
     output_dir.mkdir(parents=True, exist_ok=True)
     created: list[str] = []
 
@@ -196,10 +223,10 @@ def main() -> None:
         source = Path(args.zh_srt).expanduser().resolve()
         base_name = f"{args.video_slug}.{args.lang_tag}" if args.video_slug and args.lang_tag else source.stem
         srt_target = output_dir / f"{base_name}.clean.srt"
-        copy_if_needed(source, srt_target)
+        cues = normalize_single_language_cues(parse_srt(source), "zh", args.preset)
+        write_srt(cues, srt_target)
         created.append(str(srt_target))
         if args.emit_ass:
-            cues = parse_srt(source)
             ass_target = output_dir / f"{base_name}.{args.preset}.ass"
             write_ass(cues, ass_target, args.preset, bilingual=False)
             created.append(str(ass_target))
@@ -209,10 +236,10 @@ def main() -> None:
         source = Path(args.en_srt).expanduser().resolve()
         base_name = f"{args.video_slug}.{args.lang_tag}" if args.video_slug and args.lang_tag else source.stem
         srt_target = output_dir / f"{base_name}.clean.srt"
-        copy_if_needed(source, srt_target)
+        cues = normalize_single_language_cues(parse_srt(source), "en", args.preset)
+        write_srt(cues, srt_target)
         created.append(str(srt_target))
         if args.emit_ass:
-            cues = parse_srt(source)
             ass_target = output_dir / f"{base_name}.{args.preset}.ass"
             write_ass(cues, ass_target, args.preset, bilingual=False)
             created.append(str(ass_target))
@@ -221,7 +248,7 @@ def main() -> None:
             raise SystemExit("--en-srt and --zh-srt are required for bilingual mode")
         en_cues = parse_srt(Path(args.en_srt).expanduser().resolve())
         zh_cues = parse_srt(Path(args.zh_srt).expanduser().resolve())
-        cues = build_bilingual_cues(en_cues, zh_cues)
+        cues = build_bilingual_cues(en_cues, zh_cues, args.preset)
         base_name = f"{args.video_slug}.bilingual" if args.video_slug else "bilingual-clean"
         srt_target = output_dir / f"{base_name}.srt"
         write_srt(cues, srt_target)

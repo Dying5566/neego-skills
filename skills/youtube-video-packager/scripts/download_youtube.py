@@ -48,6 +48,10 @@ def discover_output(output_dir: Path) -> Path | None:
     return None
 
 
+def resolve_output_dir(base_dir: Path, leaf: str) -> Path:
+    return base_dir if base_dir.name == leaf else base_dir / leaf
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Download a YouTube video while preserving the original source")
     parser.add_argument("--url", required=True)
@@ -59,7 +63,7 @@ def main() -> None:
     args = parser.parse_args()
 
     ensure_binary("yt-dlp")
-    output_dir = Path(args.output_dir).expanduser().resolve()
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "source")
     output_dir.mkdir(parents=True, exist_ok=True)
     template_name = f"{args.video_slug}.%(ext)s" if args.video_slug else "%(title)s.%(ext)s"
     template = str(output_dir / template_name)

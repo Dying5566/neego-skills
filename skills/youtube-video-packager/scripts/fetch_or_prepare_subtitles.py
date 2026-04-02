@@ -72,6 +72,10 @@ def download_subs(url: str, languages: list[str], output_dir: Path, video_slug: 
     return sorted(str(path) for path in output_dir.glob("*.srt"))
 
 
+def resolve_output_dir(base_dir: Path, leaf: str) -> Path:
+    return base_dir if base_dir.name == leaf else base_dir / leaf
+
+
 def run_whisper(video: Path, output_dir: Path, language: str | None) -> list[str]:
     ensure_binary("whisper")
     cmd = ["whisper", str(video), "--output_dir", str(output_dir), "--output_format", "srt", "--task", "transcribe"]
@@ -97,7 +101,7 @@ def main() -> None:
         return
 
     ensure_binary("yt-dlp")
-    output_dir = Path(args.output_dir).expanduser().resolve()
+    output_dir = resolve_output_dir(Path(args.output_dir).expanduser().resolve(), "subtitles")
     output_dir.mkdir(parents=True, exist_ok=True)
     subtitle_listing = list_subs(args.url)
     languages = pick_languages(args.subtitle_mode, args.script_preference)
