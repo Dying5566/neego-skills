@@ -89,10 +89,12 @@ Use these fixed output types:
 ### `scripts/download_youtube.py`
 
 Downloads the original video and prints a JSON summary with the saved file path.
+It explicitly uses `yt-dlp --js-runtime node` so YouTube links that require JavaScript challenge solving can still expose their real source formats instead of degrading to low-resolution fallbacks or storyboard-only results.
 
 ### `scripts/fetch_or_prepare_subtitles.py`
 
 Fetches YouTube subtitles when available. If subtitles are missing and `subtitle_source=ask_if_missing`, it exits with a machine-readable status that indicates the workflow should pause and ask the user whether Whisper should run. For Chinese subtitle requests, it accepts a preferred script hint and returns the script that was actually chosen.
+It also explicitly uses `yt-dlp --js-runtime node` so subtitle discovery and subtitle download follow the same YouTube extraction path as video downloads on links that require JavaScript challenge solving.
 
 ### `scripts/compose_subtitles.py`
 

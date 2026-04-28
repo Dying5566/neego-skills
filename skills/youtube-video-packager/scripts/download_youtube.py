@@ -11,12 +11,12 @@ from pathlib import Path
 from path_policy import abbreviate_title, resolve_output_dir
 
 
-YT_DLP_BASE = ["yt-dlp", "--cookies-from-browser", "chrome", "--no-playlist"]
+YT_DLP_BASE = ["yt-dlp", "--cookies-from-browser", "chrome", "--js-runtime", "node", "--no-playlist"]
 YT_DLP_FALLBACK = [
     "yt-dlp",
     "--cookies-from-browser",
     "chrome",
-    "--js-runtimes",
+    "--js-runtime",
     "node",
     "--remote-components",
     "ejs:github",

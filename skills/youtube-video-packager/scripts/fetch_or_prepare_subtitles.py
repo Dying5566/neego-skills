@@ -28,7 +28,7 @@ def ensure_binary(name: str) -> None:
 
 
 def list_subs(url: str) -> str:
-    cmd = ["yt-dlp", "--cookies-from-browser", "chrome", "--list-subs", "--skip-download", "--no-playlist", url]
+    cmd = ["yt-dlp", "--cookies-from-browser", "chrome", "--js-runtime", "node", "--list-subs", "--skip-download", "--no-playlist", url]
     result = run(cmd, check=False)
     return (result.stdout or "") + "\n" + (result.stderr or "")
 
@@ -56,6 +56,8 @@ def download_subs(url: str, languages: list[str], output_dir: Path, video_slug: 
         "yt-dlp",
         "--cookies-from-browser",
         "chrome",
+        "--js-runtime",
+        "node",
         "--skip-download",
         "--ignore-no-formats-error",
         "--write-auto-sub",
