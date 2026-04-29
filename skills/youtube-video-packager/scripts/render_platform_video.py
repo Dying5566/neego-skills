@@ -76,27 +76,25 @@ def infer_video_slug(base_dir: Path, video: Path, explicit_slug: str | None) -> 
     return explicit_slug or video.stem or base_dir.name or "video"
 
 
-def build_style_updates(preset: str, video_size: tuple[int, int]) -> dict[str, tuple[int, int]]:
-    if preset == "original":
-        return {}
-
-    canvas_w, canvas_h = (int(part) for part in PRESETS[preset]["size"].split("x"))
-    video_w, video_h = video_size
-    scaled_h = int(round(video_h * canvas_w / video_w)) if video_w else canvas_h
-    visible_h = min(scaled_h, canvas_h)
-    bottom_gap = max((canvas_h - visible_h) // 2, 0)
-
-    if preset == "xiaohongshu-3x4":
-        en_margin = bottom_gap + 46
-        zh_margin = en_margin + 60
-    else:
-        en_margin = bottom_gap + 48
-        zh_margin = en_margin + 64
-
+def build_style_updates(preset: str, video_size: tuple[int, int]) -> dict[str, dict[int, str]]:
+    style_fields = {
+        1: "Arial Unicode MS",
+        2: "25",
+        3: "&H00FFFFFF",
+        5: "&H00000000",
+        6: "&H00000000",
+        15: "1",
+        16: "2",
+        17: "0",
+        18: "2",
+        19: "20",
+        20: "20",
+        21: "30",
+    }
     return {
-        "Default": (2, zh_margin),
-        "EN": (2, en_margin),
-        "ZH": (2, zh_margin),
+        "Default": style_fields,
+        "EN": style_fields,
+        "ZH": style_fields,
     }
 
 
@@ -113,9 +111,8 @@ def rewrite_ass_positions(subtitle_ass: Path, output_dir: Path, preset: str, vid
                 style_name = parts[0].split(":", 1)[1].strip()
                 update = updates.get(style_name)
                 if update:
-                    alignment, margin_v = update
-                    parts[18] = str(alignment)
-                    parts[21] = str(margin_v)
+                    for index, value in update.items():
+                        parts[index] = value
                     line = ",".join(parts)
         rewritten_lines.append(line)
 

@@ -117,30 +117,15 @@ def build_bilingual_cues(en_cues: list[Cue], zh_cues: list[Cue], preset: str, gr
 def build_ass_header(preset: str, bilingual: bool) -> str:
     if preset == "xiaohongshu-3x4":
         width, height = 1080, 1440
-        if bilingual:
-            styles = [
-                "Style: Default,Arial Unicode MS,24,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,3,0,2,70,70,74,1",
-                "Style: ZH,Arial Unicode MS,38,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,3,0,2,70,70,128,1",
-                "Style: EN,Arial Unicode MS,26,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,3,0,2,70,70,74,1",
-            ]
-        else:
-            styles = [
-                "Style: Default,Arial Unicode MS,50,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,3,0,8,70,70,930,1",
-            ]
     elif preset == "vertical-9x16":
         width, height = 1080, 1920
-        styles = [
-            "Style: Default,Arial Unicode MS,50,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,3,0,2,80,80,150,1",
-            "Style: ZH,Arial Unicode MS,46,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,3,0,2,80,80,210,1",
-            "Style: EN,Arial Unicode MS,30,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,3,0,2,80,80,150,1",
-        ]
     else:
         width, height = 640, 360
-        styles = [
-            "Style: Default,Arial Unicode MS,50,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,2,0,2,20,20,40,1",
-            "Style: ZH,Arial Unicode MS,20,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,2,0,2,20,20,52,1",
-            "Style: EN,Arial Unicode MS,15,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,2,0,2,20,20,40,1",
-        ]
+    styles = [
+        "Style: Default,Arial Unicode MS,25,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,20,20,30,1",
+        "Style: ZH,Arial Unicode MS,25,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,20,20,30,1",
+        "Style: EN,Arial Unicode MS,25,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,20,20,30,1",
+    ]
     header = [
         "[Script Info]",
         "ScriptType: v4.00+",

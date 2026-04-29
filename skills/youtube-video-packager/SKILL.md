@@ -36,8 +36,7 @@ Use this skill for end-to-end YouTube packaging workflows: download the original
 6. If the user asked for a platform-ready output, export it with `scripts/render_platform_video.py`.
    - `preset=original | xiaohongshu-3x4 | vertical-9x16`
    - if the user asked for a Xiaohongshu version or a short-video version and did not specify a background, default to `background=black`
-   - if the output is a Xiaohongshu version or short-video version and the user did not specify subtitle size, default to Chinese subtitle size `50`
-   - keep burned subtitles fixed inside the visible video content area near the bottom instead of letting them float in the outer canvas
+   - use the fixed burned subtitle style: `Arial Unicode MS`, size `25`, white text, black outline `2`, bottom-center alignment, bottom margin `30`, left/right margins `20`
    - if the user asks for subtitles and also asks for a Xiaohongshu version or short-video version, export two burned videos by default: one `preset=original` deliverable and one platform preset deliverable
    - `render_mode=none | burn`
 7. Return a concise summary that always includes:
@@ -82,7 +81,7 @@ Use these fixed output types:
 - localized subtitle directory + `<video_slug>.<lang>.srt` for standalone subtitles
 - localized subtitle directory + `<video_slug>.<lang>.<preset>.ass` for styled subtitles
 - localized render directory + `<video_slug>.<preset>.<lang>.burned.mp4` for burned outputs
-- for Xiaohongshu or short-video exports, use black background and default Chinese subtitle size `50` unless the user explicitly overrides them
+- for Xiaohongshu or short-video exports, use black background and the fixed burned subtitle style unless the user explicitly overrides it
 
 ## Scripts
 
